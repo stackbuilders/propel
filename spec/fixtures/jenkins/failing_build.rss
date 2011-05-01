@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>All last builds only</title>
+	<link type="text/html" href="http://ci.example.com/job/FRED/" rel="alternate"/>
+	<updated>2011-04-22T18:20:32Z</updated>
+	<author>
+		<name>Jenkins Server</name>
+	</author>
+	<id>urn:uuid:903deee0-7bfa-11db-9fe1-0800200c9a66</id>
+	<entry>
+		<title>FRED #72 (broken since build #70)</title>
+		<link type="text/html" href="http://ci.example.com/job/FRED/72/" rel="alternate"/>
+		<id>tag:hudson.dev.java.net,2011:FRED:2011-04-22_14-20-32</id>
+		<published>2011-04-22T18:20:32Z</published>
+		<updated>2011-04-22T18:20:32Z</updated>
+	</entry>
+	<entry>
+		<title>FRED #70 (broken since this build)</title>
+		<link type="text/html" href="http://ci.example.com/job/FRED/70/" rel="alternate"/>
+		<id>tag:hudson.dev.java.net,2011:FRED:2011-04-22_12-59-34</id>
+		<published>2011-04-22T16:59:34Z</published>
+		<updated>2011-04-22T16:59:34Z</updated>
+	</entry>
+</feed>

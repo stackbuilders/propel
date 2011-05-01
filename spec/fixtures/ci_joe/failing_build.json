@@ -1,0 +1,14 @@
+{ "jobs": [
+{"name":"Test Project",
+ "url":"http://joe.example.co",
+ "color":"red",
+ "status":"failed",
+ "started_at":"January 1, 2010 10:00 AM",
+ "finished_at":"January 1, 2010 10:05 AM",
+ "duration":"5 minutes",
+ "sha":"66bd3c89c1d1d25c18ad931b975473c7d592a2be",
+ "short_sha":"66bd3c89",
+ "commit_url":"http://github.com/myproj/somecommit",
+ "branch":"master"
+ }
+]}

@@ -29,8 +29,8 @@ describe Propel::Runner do
 
     it "should call propel! if the remote build is configured and passing" do
       runner = Propel::Runner.new(%w[ --status-url http://ci.example.com/status ])
-      runner.stub!(:remote_build_passing?).and_return(true)
       runner.stub!(:remote_build_configured?).and_return(true)
+      runner.stub!(:remote_build_green?).and_return(true)
 
       runner.should_receive(:propel!)
 
@@ -49,7 +49,7 @@ describe Propel::Runner do
     it "should send an alert about the broken build if the remote build is configured but not passing" do
       runner = Propel::Runner.new
       runner.stub!(:remote_build_configured?).and_return true
-      runner.stub!(:remote_build_passing?).and_return false
+      runner.stub!(:remote_build_green?).and_return false
 
       runner.should_receive(:alert_broken_build_and_exit).and_raise(TestError.new("Execution should be aborted here"))
       runner.should_not_receive(:propel!)
@@ -96,6 +96,11 @@ describe Propel::Runner do
 
       runner.should_receive(:remote_build_green?).twice.and_return(false, true)
 
+      runner.should_receive(:log_wait_notice)
+
+      runner.should_receive(:wait_with_notice).and_yield
+
+      runner.stub!(:puts)
       runner.stub!(:print).with('.')
       runner.stub!(:sleep).with(5)
       

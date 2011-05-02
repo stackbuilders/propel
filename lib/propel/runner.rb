@@ -9,9 +9,7 @@ module Propel
 
       if git_repository.changed?
         if remote_build_configured?
-          unless ignore_remote_build?
-            alert_broken_build_and_exit unless remote_build_passing?
-          end
+          check_remote_build! unless ignore_remote_build?
 
         else
           puts "Remote build is not configured, skipping check." if @options[:verbose]
@@ -25,16 +23,33 @@ module Propel
 
     private
 
-    def remote_build_passing?
+    def check_remote_build!
       if @options[:wait]
-        wait until remote_build_green?
-        true
+        unless remote_build_green?
+          wait_with_notice do
+            log_wait_notice
+            wait until remote_build_green?
+            puts "\nThe build has been fixed."
+          end
+        end
 
       else
-        remote_build_green?
+        
+        alert_broken_build_and_exit unless remote_build_green?
       end
     end
-    
+
+    def wait_with_notice
+      start_time = Time.now
+      yield
+      end_time = Time.now
+      puts "We waited for #{(end_time - start_time).round} seconds while the build was failing."
+    end
+
+    def log_wait_notice
+      puts "The remote build is failing, waiting until it is green to proceed."
+    end
+
     def alert_broken_build_and_exit
       msg = <<-EOS
         The remote build is broken. If your commit fixes the build, run propel with the --force (-f) option.

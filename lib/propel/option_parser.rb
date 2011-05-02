@@ -14,6 +14,7 @@ module Propel
     end
 
     def parser(options)
+      puts "the options are #{options.inspect}"
       ::OptionParser.new do |parser|
         parser.banner = "Usage: propel [options]\n\n"
         
@@ -22,8 +23,8 @@ module Propel
         options[:verbose] = false
         options[:wait] = false
 
-        parser.on('-s', '--status-url', 'Location of build status') do |o|
-          options[:status_url] = o
+        parser.on('-s', '--status-url STATUS_URL', 'Location of build status feed') do |build_status_url|
+          options[:status_url] = build_status_url
         end
 
         parser.on('-f', '--[no-]force', 'Use propel --force to ignore any remote build failures') do |o|

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    propel (0.2.1)
+    propel (0.2.2)
       json
 
 GEM

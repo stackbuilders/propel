@@ -54,7 +54,7 @@ module Propel
 
     def alert_broken_build_and_exit
       msg = <<-EOS
-        The remote build is broken. If your commit fixes the build, run propel with the --force (-f) option.
+        The remote build is broken. If your commit fixes the build, run propel with the --fix-ci (-f) option.
         If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 

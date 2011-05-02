@@ -14,7 +14,6 @@ module Propel
     end
 
     def parser(options)
-      puts "the options are #{options.inspect}"
       ::OptionParser.new do |parser|
         parser.banner = "Usage: propel [options]\n\n"
         

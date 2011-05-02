@@ -1,7 +1,8 @@
 module Propel
   class Configuration
-    def initialize(command_line_arguments)
+    def initialize(command_line_arguments, repository)
       @command_line_options = command_line_arguments
+      @repository = repository
     end
 
     DEFAULTS = {
@@ -15,6 +16,10 @@ module Propel
       DEFAULTS.merge(parse(options_from_config_file).merge(parse @command_line_options))
     end
 
+    def config_file
+      File.join(@repository.project_root, ".propel")
+    end
+    
     private
     def options_from_config_file
       File.exist?(config_file) ? File.read(config_file).split : [ ]
@@ -22,10 +27,6 @@ module Propel
 
     def parse(option_array)
       Propel::OptionParser.parse!(option_array)
-    end
-
-    def config_file
-      './.propel'
     end
   end
 end

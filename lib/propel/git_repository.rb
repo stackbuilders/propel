@@ -4,6 +4,10 @@ module Propel
       new.changed?
     end
 
+    def project_root
+      git("rev-parse --show-toplevel")
+    end
+
     def changed?
       local_last_commit != remote_last_commit
     end

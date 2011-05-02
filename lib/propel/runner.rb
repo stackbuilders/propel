@@ -1,13 +1,12 @@
 module Propel
   class Runner
     def initialize(args = [ ])
-      @options = Configuration.new(args).options
+      @repository = GitRepository.new
+      @options = Configuration.new(args, @repository).options
     end
 
     def start
-      git_repository = GitRepository.new
-
-      if git_repository.changed?
+      if @repository.changed?
         if remote_build_configured?
           check_remote_build! unless ignore_remote_build?
 
@@ -17,7 +16,7 @@ module Propel
 
         propel!
       else
-        puts "There is nothing to propel - your HEAD is identical to #{git_repository.remote_config} #{git_repository.merge_config}."
+        puts "There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}."
       end
     end
 

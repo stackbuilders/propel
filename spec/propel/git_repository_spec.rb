@@ -11,6 +11,13 @@ describe Propel::GitRepository do
     end
   end
 
+  describe "#project_root" do
+    it "should return the root of the project" do
+      project_root = File.expand_path(File.join(File.dirname(__FILE__), %w[ .. .. ]))
+      Propel::GitRepository.new.project_root.should == project_root
+    end
+  end
+  
   describe "#changed?" do
     it "should return false when the remote branch has the same SHA1 as the local HEAD" do
       git_repository = Propel::GitRepository.new

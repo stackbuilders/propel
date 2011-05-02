@@ -17,10 +17,10 @@ module Propel
       ::OptionParser.new do |parser|
         parser.banner = "Usage: propel [options]\n\n"
         
-        options[:force] = false
-        options[:rebase] = true
+        options[:force]   = false
+        options[:rebase]  = true
         options[:verbose] = false
-        options[:wait] = false
+        options[:wait]    = false
 
         parser.on('-s', '--status-url STATUS_URL', 'Location of build status feed') do |build_status_url|
           options[:status_url] = build_status_url

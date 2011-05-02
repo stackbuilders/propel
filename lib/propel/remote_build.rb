@@ -10,9 +10,9 @@ module Propel
     end
 
     FAIL_PATTERNS = {
-        :jenkins => /\(broken/,
-        :team_city => /(?:has failed)$/,
-        :ci_joe => /^failed$/
+        :jenkins    => /\(broken/,
+        :team_city  => /(?:has failed)$/,
+        :ci_joe     => /^failed$/
     }
 
     def passing?

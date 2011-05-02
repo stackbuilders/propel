@@ -23,7 +23,14 @@ passing the option --status-url http://ci.example.com/yourbuild.rss.  Propel wil
 passing as of the latest commit for Jenkins, Team City and CI Joe.
 
 Once you figure out the options that work for you, just put a .propel file in the root of your project.
-Command line parameters override the options found in the configuration file.
+Command line parameters override the options found in the configuration file.  Your configuration file should
+have one parameter on each line.  For example:
+
+    --status-url http://ci.example.com/job/Test%20project/rssAll
+    --wait
+
+This will set the status url for the project, and default to waiting for the CI build to pass if it is currently
+failing.
 
 ## Credits
 

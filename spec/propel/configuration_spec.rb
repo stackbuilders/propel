@@ -20,7 +20,7 @@ describe Propel::Configuration do
       configuration = Propel::Configuration.new([], Propel::GitRepository.new)
       configuration.stub!(:options_from_config_file).and_return([])
 
-      configuration.options.should == { :rebase => true, :force => false, :verbose => false, :wait => false}
+      configuration.options.should == { :rebase => true, :fix_ci => false, :verbose => false, :wait => false}
     end    
   end
 

@@ -61,8 +61,8 @@ describe Propel::Runner do
       }.should raise_error(TestError)
     end
 
-    it "should call propel! when the remote build is failing if --force is specified" do
-      runner = Propel::Runner.new %w[ --force ]
+    it "should call propel! when the remote build is failing if --fix-ci is specified" do
+      runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return true
       runner.stub!(:remote_build_passing?).and_return false
       runner.should_receive(:propel!)
@@ -70,8 +70,8 @@ describe Propel::Runner do
       runner.start
     end
 
-    it "should call propel! when the remote build is not configured if --force is specified" do
-      runner = Propel::Runner.new %w[ --force ]
+    it "should call propel! when the remote build is not configured if --fix-ci is specified" do
+      runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return false
 
       runner.should_receive(:propel!)

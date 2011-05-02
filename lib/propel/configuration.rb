@@ -6,7 +6,7 @@ module Propel
     end
 
     DEFAULTS = {
-        :force    => false,
+        :fix_ci    => false,
         :rebase   => true,
         :verbose  => false,
         :wait     => false

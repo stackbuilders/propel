@@ -21,8 +21,8 @@ module Propel
           options[:status_url] = build_status_url
         end
 
-        parser.on('-f', '--[no-]force', 'Ignores any remote build failures') do |o|
-          options[:force] = o
+        parser.on('-f', '--fix-ci', 'Use when fixing the CI build') do |o|
+          options[:fix_ci] = o
         end
 
         parser.on('-r', '--[no-]rebase', 'Determines whether or not pull uses rebase.  Propel uses rebase by default.') do |o|

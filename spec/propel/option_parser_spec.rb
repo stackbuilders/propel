@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe Propel::OptionParser do
   describe ".parse!" do
-    it "should set force to true when given as an option" do
-      Propel::OptionParser.parse!(['--force'])[:force].should be_true
+    it "should set fix_ci to true when given as an option" do
+      Propel::OptionParser.parse!(['--fix-ci'])[:fix_ci].should be_true
     end
 
     it "should set rebase to false when given as an option" do

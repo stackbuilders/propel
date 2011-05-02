@@ -4,8 +4,15 @@ module Propel
       @command_line_options = command_line_arguments
     end
 
+    DEFAULTS = {
+        :force    => false,
+        :rebase   => true,
+        :verbose  => false,
+        :wait     => false
+    }
+
     def options
-      parse(options_from_config_file).merge(parse @command_line_options)
+      DEFAULTS.merge(parse(options_from_config_file).merge(parse @command_line_options))
     end
 
     private

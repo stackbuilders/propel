@@ -24,3 +24,8 @@ passing as of the latest commit for Jenkins, Team City and CI Joe.
 
 Once you figure out the options that work for you, just put a .propel file in the root of your project.
 Command line parameters override the options found in the configuration file.
+
+## Credits
+
+Thanks to Jose Carrion (http://joselo.github.com/) for pair programming with me for several hours during the
+development of Propel.

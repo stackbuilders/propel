@@ -6,16 +6,15 @@ Gem::Specification.new do |s|
   s.name        = "propel"
   s.version     = Propel::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Justin Leitgeb", "Jose Carrion"]
-  s.email       = ["justin@stackbuilders.com", "jcarrion@stackbuilders.com"]
+  s.authors     = ["Justin Leitgeb"]
+  s.email       = ["justin@stackbuilders.com"]
   s.homepage    = "http://github.com/stackbuilders/propel"
   s.summary     = "Propel helps you to follow best practices for pushing code to a remote git repo"
   s.description = <<-EOS
-    The 'propel' script helps you to push your code to a remote server while following best practices,
-    especially in regard to Continuous Integration (CI).  Propel first checks the CI server to make sure
-    it's passing, and then runs the local spec suite and pushes changes.  If the remote server is failing,
-    you can tell propel to wait until it passes, and then proceed to run your build and push if the local
-    build passes.
+    The 'propel' script helps you to push your code to a remote server while following Continuous Integration (CI)
+    best practices.  Propel first checks the CI server to make sure it's passing, and then runs the local spec
+    suite and pushes changes.  If the remote server is failing, just have propel wait for it to pass while you get
+    a coffee.
   EOS
 
   s.files         = `git ls-files`.split("\n")

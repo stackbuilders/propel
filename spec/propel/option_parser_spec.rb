@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe Propel::OptionParser do
   describe ".parse!" do
-    it "should set default options" do
-      Propel::OptionParser.parse!.should == {:rebase => true, :force => false, :verbose => false, :wait => false}
-    end
-
     it "should set force to true when given as an option" do
       Propel::OptionParser.parse!(['--force'])[:force].should be_true
     end

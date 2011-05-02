@@ -45,16 +45,18 @@ describe Propel::Runner do
       runner.start
     end
 
-    it "should raise an error and not call propel! if the remote build is configured but not passing" do
+    class TestError < StandardError ; end
+    it "should send an alert about the broken build if the remote build is configured but not passing" do
       runner = Propel::Runner.new
       runner.stub!(:remote_build_configured?).and_return true
       runner.stub!(:remote_build_passing?).and_return false
-      
+
+      runner.should_receive(:alert_broken_build_and_exit).and_raise(TestError.new("Execution should be aborted here"))
       runner.should_not_receive(:propel!)
 
       lambda {
         runner.start
-      }.should raise_error(RuntimeError, "The remote build is broken. If your commit fixes the build, run propel with the --force (-f) option.")
+      }.should raise_error(TestError)
     end
 
     it "should call propel! when the remote build is failing if --force is specified" do
@@ -95,7 +97,7 @@ describe Propel::Runner do
       runner.should_receive(:remote_build_green?).twice.and_return(false, true)
 
       runner.stub!(:print).with('.')
-      runner.stub!(:sleep).with(10)
+      runner.stub!(:sleep).with(5)
       
       runner.should_receive(:propel!)
       runner.start

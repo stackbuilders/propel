@@ -8,7 +8,15 @@ module Propel
       git_repository = GitRepository.new
 
       if git_repository.changed?
-        check_remote_build! unless ignore_remote_build?
+        if remote_build_configured?
+          unless ignore_remote_build?
+            alert_broken_build_and_exit unless remote_build_passing?
+          end
+
+        else
+          puts "Remote build is not configured, skipping check." if @options[:verbose]
+        end
+
         propel!
       else
         puts "There is nothing to propel - your HEAD is identical to #{git_repository.remote_config} #{git_repository.merge_config}."
@@ -17,16 +25,24 @@ module Propel
 
     private
 
-    def check_remote_build!
-      if remote_build_configured?
-
-        if !remote_build_passing?
-          raise "The remote build is broken. If your commit fixes the build, run propel with the --force (-f) option."
-        end
+    def remote_build_passing?
+      if @options[:wait]
+        wait until remote_build_green?
+        true
 
       else
-        puts "Remote build is not configured, skipping check." if @options[:verbose]
+        remote_build_green?
       end
+    end
+    
+    def alert_broken_build_and_exit
+      msg = <<-EOS
+        The remote build is broken. If your commit fixes the build, run propel with the --force (-f) option.
+        If you're waiting for someone else to fix the build, use propel with --wait (-w).
+      EOS
+
+      $stderr.puts msg.split("\n").map(&:strip)
+      exit 1
     end
 
     def ignore_remote_build?
@@ -37,17 +53,10 @@ module Propel
       !@options[:status_url].nil?
     end
 
-    def remote_build_passing?
-      if @options[:wait]
-        until remote_build_green? do
-          print "."
-          sleep 10
-        end
-
-        true
-      else
-        remote_build_green?
-      end
+    def wait
+      print "."
+      STDOUT.flush
+      sleep 5
     end
 
     def remote_build_green?

@@ -23,6 +23,7 @@ module Propel
     private
 
     def check_remote_build!
+      puts "Checking remote build..."
       if @options[:wait]
         unless remote_build_green?
           wait_with_notice do
@@ -36,6 +37,8 @@ module Propel
         
         alert_broken_build_and_exit unless remote_build_green?
       end
+
+      puts "Remote build is passing."
     end
 
     def wait_with_notice

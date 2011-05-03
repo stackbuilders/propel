@@ -14,6 +14,10 @@ describe Propel::OptionParser do
       Propel::OptionParser.parse!(['--wait'])[:wait].should be_true
     end
 
+    it "should set quiet to true when given as an option" do
+      Propel::OptionParser.parse!(['--quiet'])[:quiet].should be_true
+    end
+
     it "should set the status url based on the given parameters" do
       Propel::OptionParser.parse!(['--status-url', 'http://ci.example.com/feed.rss'])[:status_url].
           should == 'http://ci.example.com/feed.rss'

@@ -36,6 +36,10 @@ module Propel
         parser.on('-w', '--[no-]wait', 'Waits for fixes to remote build.') do |o|
           options[:wait] = o
         end
+
+        parser.on('-q', '--[no-]quiet', 'Silences normal output messages.') do |o|
+          options[:quiet] = o
+        end
       end
     end
   end

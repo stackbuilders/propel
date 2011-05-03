@@ -1,14 +1,11 @@
 module Propel
   class Runner
-    COLORS = {
-        :red    => 31,
-        :green  => 32,
-        :yellow => 33,
-    }
-
+    attr_reader :logger
+    
     def initialize(args = [ ])
       @repository = GitRepository.new
-      @options = Configuration.new(args, @repository).options
+      @options    = Configuration.new(args, @repository).options
+      @logger     = Logger.new(@options)
     end
 
     def start
@@ -17,24 +14,21 @@ module Propel
           check_remote_build! unless @options[:fix_ci]
 
         else
-          warn "Remote build is not configured, you should point propel to the status URL of your CI server."
+          @logger.warn "Remote build is not configured, you should point propel to the status URL of your CI server."
           
         end
 
         propel!
       else
-        puts color("There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.", :green)
+        @logger.puts("There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.", :green)
+        
       end
     end
 
     private
 
-    def color(message, color_sym)
-      @options[:color] ? "\e[#{COLORS[color_sym]}m#{message}\e[0m" : message
-    end
-
     def check_remote_build!
-      print "CI server status:\t"
+      @logger.print "CI server status:\t"
       STDOUT.flush
 
       waited_for_build = false
@@ -43,10 +37,10 @@ module Propel
           waited_for_build = true
           
           say_duration do
-            puts color("FAILING", :red)
-            puts "Waiting until the CI build is green to proceed."
+            @logger.puts("FAILING", :red)
+            @logger.puts "Waiting until the CI build is green to proceed."
             wait until remote_build_green?
-            puts color("\nThe CI build has been fixed.", :green)
+            @logger.puts("\nThe CI build has been fixed.", :green)
           end
         end
 
@@ -55,14 +49,14 @@ module Propel
         alert_broken_build_and_exit unless remote_build_green?
       end
 
-      puts color("PASSING", :green) unless waited_for_build
+      @logger.puts("PASSING", :green) unless waited_for_build
     end
 
     def say_duration
       start_time = Time.now
       yield
       end_time = Time.now
-      puts "We waited for #{(end_time - start_time).round} seconds while the build was failing."
+      @logger.puts("We waited for #{(end_time - start_time).round} seconds while the build was failing.")
     end
 
     def alert_broken_build_and_exit
@@ -71,7 +65,7 @@ module Propel
         If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 
-      warn color(msg.split("\n").map(&:strip), :red)
+      warn msg.split("\n").map(&:strip)
       exit 1
     end
 
@@ -80,8 +74,7 @@ module Propel
     end
 
     def wait
-      print color(".", :yellow)
-      STDOUT.flush
+      @logger.print(".", :yellow)
       sleep 5
     end
 

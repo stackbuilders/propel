@@ -34,7 +34,6 @@ module Propel
           waited_for_build = true
           
           say_duration do
-            log_wait_notice
             puts "The remote build is failing, waiting until it is green to proceed.".red
             wait until remote_build_green?
             puts "\nThe build has been fixed.".green

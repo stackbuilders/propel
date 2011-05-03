@@ -8,7 +8,7 @@ module Propel
     def start
       if @repository.changed?
         if remote_build_configured?
-          check_remote_build! unless fix_ci?
+          check_remote_build! unless @options[:fix_ci]
 
         else
           puts "Remote build is not configured, skipping check." if @options[:verbose]
@@ -57,10 +57,6 @@ module Propel
 
       $stderr.puts msg.split("\n").map(&:strip)
       exit 1
-    end
-
-    def fix_ci?
-      @options[:fix_ci]
     end
 
     def remote_build_configured?

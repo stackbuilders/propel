@@ -38,7 +38,7 @@ module Propel
           
           say_duration do
             @logger.puts("FAILING", :red)
-            @logger.puts "Waiting until the CI build is green to proceed."
+            @logger.puts "Waiting until the CI build is green."
             wait until remote_build_green?
             @logger.puts("\nThe CI build has been fixed.", :green)
           end

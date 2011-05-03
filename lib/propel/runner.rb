@@ -28,6 +28,7 @@ module Propel
         unless remote_build_green?
           say_duration do
             log_wait_notice
+            puts "The remote build is failing, waiting until it is green to proceed."
             wait until remote_build_green?
             puts "\nThe build has been fixed."
           end
@@ -46,10 +47,6 @@ module Propel
       yield
       end_time = Time.now
       puts "We waited for #{(end_time - start_time).round} seconds while the build was failing."
-    end
-
-    def log_wait_notice
-      puts "The remote build is failing, waiting until it is green to proceed."
     end
 
     def alert_broken_build_and_exit

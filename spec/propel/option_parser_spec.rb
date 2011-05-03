@@ -10,10 +10,6 @@ describe Propel::OptionParser do
       Propel::OptionParser.parse!(['--no-rebase'])[:rebase].should be_false
     end
 
-    it "should set verbose to true when given as an option" do
-      Propel::OptionParser.parse!(['--verbose'])[:verbose].should be_true
-    end
-
     it "should set wait to true when given as an option" do
       Propel::OptionParser.parse!(['--wait'])[:wait].should be_true
     end

@@ -25,16 +25,12 @@ module Propel
           options[:fix_ci] = o
         end
 
-        parser.on('-r', '--[no-]rebase', 'Determines whether or not pull uses rebase.  Propel uses rebase by default.') do |o|
+        parser.on('-r', '--[no-]rebase', 'Use pull with --rebase.  Rebase is used by default.') do |o|
           options[:rebase] = o
         end
 
-        parser.on('-w', '--[no-]wait', 'Waits for fixes to remote build') do |o|
+        parser.on('-w', '--[no-]wait', 'Waits for fixes to remote build.') do |o|
           options[:wait] = o
-        end
-
-        parser.on('-v', '--verbose', 'Shows extra information') do |o|
-          options[:verbose] = o
         end
       end
     end

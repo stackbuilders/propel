@@ -11,7 +11,8 @@ module Propel
           check_remote_build! unless @options[:fix_ci]
 
         else
-          puts "Remote build is not configured, skipping check." if @options[:verbose]
+          $stderr.puts "Remote build is not configured, you should point propel to the status URL of your CI server."
+          
         end
 
         propel!

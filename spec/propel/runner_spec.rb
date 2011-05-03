@@ -23,6 +23,7 @@ describe Propel::Runner do
       @git_repository.stub!(:remote_config).and_return('origin')
       @git_repository.stub!(:remote_config).and_return('refs/heads/master')
 
+      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
       runner.should_receive(:propel!)
       runner.start
     end
@@ -42,6 +43,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new
       runner.stub!(:remote_build_configured?).and_return false
       runner.should_receive(:propel!)
+      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
 
       runner.start
     end
@@ -74,6 +76,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return false
 
+      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
       runner.should_receive(:propel!)
 
       runner.start
@@ -81,7 +84,9 @@ describe Propel::Runner do
 
     it "should run a command using pull --rebase by default" do
       runner = Propel::Runner.new
-      
+
+      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+
       runner.should_receive(:system).with("git pull --rebase && rake && git push")
       runner.start
     end
@@ -89,6 +94,8 @@ describe Propel::Runner do
     it "should run a command using pull without --rebase when --no-rebase is specified" do
       runner = Propel::Runner.new(['--no-rebase'])
       runner.should_receive(:system).with("git pull && rake && git push")
+      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+
       runner.start
     end
 

@@ -1,3 +1,5 @@
+require 'colored'
+
 module Propel
   class Runner
     def initialize(args = [ ])
@@ -17,7 +19,7 @@ module Propel
 
         propel!
       else
-        puts "There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}."
+        puts "There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.".green
       end
     end
 
@@ -25,13 +27,17 @@ module Propel
 
     def check_remote_build!
       puts "Checking remote build..."
+
+      waited_for_build = false
       if @options[:wait]
         unless remote_build_green?
+          waited_for_build = true
+          
           say_duration do
             log_wait_notice
-            puts "The remote build is failing, waiting until it is green to proceed."
+            puts "The remote build is failing, waiting until it is green to proceed.".red
             wait until remote_build_green?
-            puts "\nThe build has been fixed."
+            puts "\nThe build has been fixed.".green
           end
         end
 
@@ -40,7 +46,7 @@ module Propel
         alert_broken_build_and_exit unless remote_build_green?
       end
 
-      puts "Remote build is passing."
+      puts "Remote build is passing.".green unless waited_for_build
     end
 
     def say_duration
@@ -56,7 +62,7 @@ module Propel
         If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 
-      $stderr.puts msg.split("\n").map(&:strip)
+      $stderr.puts msg.split("\n").map(&:strip).red
       exit 1
     end
 
@@ -65,7 +71,7 @@ module Propel
     end
 
     def wait
-      print "."
+      print ".".yellow
       STDOUT.flush
       sleep 5
     end

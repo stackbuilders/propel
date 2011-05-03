@@ -35,7 +35,7 @@ describe Propel::Runner do
 
       runner.should_receive(:propel!)
       runner.should_receive(:puts).with("Checking remote build...")
-      runner.should_receive(:puts).with("Remote build is passing.")
+      runner.should_receive(:puts).with("\e[32mRemote build is passing.\e[0m")
       runner.start
     end
 

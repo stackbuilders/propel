@@ -2,11 +2,13 @@ PATH
   remote: .
   specs:
     propel (0.2.2)
+      colored
       json
 
 GEM
   remote: http://rubygems.org/
   specs:
+    colored (1.2)
     diff-lcs (1.1.2)
     json (1.5.1)
     rspec (2.5.0)

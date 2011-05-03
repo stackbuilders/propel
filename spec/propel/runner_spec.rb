@@ -100,7 +100,7 @@ describe Propel::Runner do
 
       runner.should_receive(:log_wait_notice)
 
-      runner.should_receive(:wait_with_notice).and_yield
+      runner.should_receive(:say_duration).and_yield
 
       runner.stub!(:puts)
       runner.stub!(:print).with('.')

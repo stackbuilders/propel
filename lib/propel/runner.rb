@@ -26,7 +26,7 @@ module Propel
       puts "Checking remote build..."
       if @options[:wait]
         unless remote_build_green?
-          wait_with_notice do
+          say_duration do
             log_wait_notice
             wait until remote_build_green?
             puts "\nThe build has been fixed."
@@ -41,7 +41,7 @@ module Propel
       puts "Remote build is passing."
     end
 
-    def wait_with_notice
+    def say_duration
       start_time = Time.now
       yield
       end_time = Time.now

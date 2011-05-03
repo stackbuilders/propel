@@ -23,19 +23,20 @@ describe Propel::Runner do
       @git_repository.stub!(:remote_config).and_return('origin')
       @git_repository.stub!(:remote_config).and_return('refs/heads/master')
 
-      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
       runner.should_receive(:propel!)
       runner.start
     end
 
     it "should call propel! if the remote build is configured and passing" do
       runner = Propel::Runner.new(%w[ --status-url http://ci.example.com/status ])
+      
       runner.stub!(:remote_build_configured?).and_return(true)
       runner.stub!(:remote_build_green?).and_return(true)
 
       runner.should_receive(:propel!)
-      runner.should_receive(:puts).with("Checking remote build...")
-      runner.should_receive(:puts).with("\e[32mRemote build is passing.\e[0m")
+      runner.should_receive(:puts).with("CI server status:\t")
+      runner.should_receive(:puts).with("[\e[32mPASSING\e[0m]")
       runner.start
     end
 
@@ -43,7 +44,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new
       runner.stub!(:remote_build_configured?).and_return false
       runner.should_receive(:propel!)
-      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
 
       runner.start
     end
@@ -57,7 +58,7 @@ describe Propel::Runner do
       runner.should_receive(:alert_broken_build_and_exit).and_raise(TestError.new("Execution should be aborted here"))
       runner.should_not_receive(:propel!)
 
-      runner.should_receive(:puts).with("Checking remote build...")
+      runner.should_receive(:puts).with("CI server status:\t")
       lambda {
         runner.start
       }.should raise_error(TestError)
@@ -76,7 +77,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return false
 
-      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
       runner.should_receive(:propel!)
 
       runner.start
@@ -85,7 +86,7 @@ describe Propel::Runner do
     it "should run a command using pull --rebase by default" do
       runner = Propel::Runner.new
 
-      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
 
       runner.should_receive(:system).with("git pull --rebase && rake && git push")
       runner.start
@@ -94,7 +95,7 @@ describe Propel::Runner do
     it "should run a command using pull without --rebase when --no-rebase is specified" do
       runner = Propel::Runner.new(['--no-rebase'])
       runner.should_receive(:system).with("git pull && rake && git push")
-      $stderr.should_receive(:puts).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
 
       runner.start
     end
@@ -104,8 +105,6 @@ describe Propel::Runner do
       runner.stub!(:remote_build_configured?).and_return true
 
       runner.should_receive(:remote_build_green?).twice.and_return(false, true)
-
-      runner.should_receive(:log_wait_notice)
 
       runner.should_receive(:say_duration).and_yield
 

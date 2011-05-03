@@ -1,7 +1,11 @@
-require 'colored'
-
 module Propel
   class Runner
+    COLORS = {
+        :red    => 30,
+        :green  => 32,
+        :yellow => 33,
+    }
+
     def initialize(args = [ ])
       @repository = GitRepository.new
       @options = Configuration.new(args, @repository).options
@@ -13,20 +17,24 @@ module Propel
           check_remote_build! unless @options[:fix_ci]
 
         else
-          $stderr.puts "Remote build is not configured, you should point propel to the status URL of your CI server."
+          warn "Remote build is not configured, you should point propel to the status URL of your CI server."
           
         end
 
         propel!
       else
-        puts "There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.".green
+        puts color("There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.", :green)
       end
     end
 
     private
 
+    def color(message, color_sym)
+      "\e[#{COLORS[color_sym]}m#{message}\e[0m"
+    end
+
     def check_remote_build!
-      puts "Checking remote build..."
+      puts "CI server status:\t"
 
       waited_for_build = false
       if @options[:wait]
@@ -34,9 +42,10 @@ module Propel
           waited_for_build = true
           
           say_duration do
-            puts "The remote build is failing, waiting until it is green to proceed.".red
+            puts "[" + color("FAILING", :red) + "]"
+            puts "Waiting until the CI build is green to proceed."
             wait until remote_build_green?
-            puts "\nThe build has been fixed.".green
+            puts color("\nThe CI build has been fixed.", :green)
           end
         end
 
@@ -45,7 +54,7 @@ module Propel
         alert_broken_build_and_exit unless remote_build_green?
       end
 
-      puts "Remote build is passing.".green unless waited_for_build
+      puts "[" + color("PASSING", :green) + "]" unless waited_for_build
     end
 
     def say_duration
@@ -61,7 +70,7 @@ module Propel
         If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 
-      $stderr.puts msg.split("\n").map(&:strip).red
+      warn color(msg.split("\n").map(&:strip), :red)
       exit 1
     end
 
@@ -70,7 +79,7 @@ module Propel
     end
 
     def wait
-      print ".".yellow
+      print color(".", :yellow)
       STDOUT.flush
       sleep 5
     end

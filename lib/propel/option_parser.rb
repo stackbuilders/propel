@@ -29,6 +29,10 @@ module Propel
           options[:rebase] = o
         end
 
+        parser.on('-c', '--[no-]color', '--[no-]colour', 'Turn on or off colored output. Color is off by default.') do |o|
+          options[:color] = o
+        end
+
         parser.on('-w', '--[no-]wait', 'Waits for fixes to remote build.') do |o|
           options[:wait] = o
         end

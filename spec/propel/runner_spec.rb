@@ -35,8 +35,8 @@ describe Propel::Runner do
       runner.stub!(:remote_build_green?).and_return(true)
 
       runner.should_receive(:propel!)
-      runner.should_receive(:puts).with("CI server status:\t")
-      runner.should_receive(:puts).with("[\e[32mPASSING\e[0m]")
+      runner.should_receive(:print).with("CI server status:\t")
+      runner.should_receive(:puts).with("PASSING")
       runner.start
     end
 
@@ -58,7 +58,7 @@ describe Propel::Runner do
       runner.should_receive(:alert_broken_build_and_exit).and_raise(TestError.new("Execution should be aborted here"))
       runner.should_not_receive(:propel!)
 
-      runner.should_receive(:puts).with("CI server status:\t")
+      runner.should_receive(:print).with("CI server status:\t")
       lambda {
         runner.start
       }.should raise_error(TestError)
@@ -111,6 +111,7 @@ describe Propel::Runner do
       runner.stub!(:puts)
       runner.stub!(:print).with('.')
       runner.stub!(:sleep).with(5)
+      runner.stub!(:print).with("CI server status:\t")
       
       runner.should_receive(:propel!)
       runner.start

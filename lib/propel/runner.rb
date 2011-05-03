@@ -1,7 +1,7 @@
 module Propel
   class Runner
     COLORS = {
-        :red    => 30,
+        :red    => 31,
         :green  => 32,
         :yellow => 33,
     }
@@ -30,11 +30,12 @@ module Propel
     private
 
     def color(message, color_sym)
-      "\e[#{COLORS[color_sym]}m#{message}\e[0m"
+      @options[:color] ? "\e[#{COLORS[color_sym]}m#{message}\e[0m" : message
     end
 
     def check_remote_build!
-      puts "CI server status:\t"
+      print "CI server status:\t"
+      STDOUT.flush
 
       waited_for_build = false
       if @options[:wait]
@@ -42,7 +43,7 @@ module Propel
           waited_for_build = true
           
           say_duration do
-            puts "[" + color("FAILING", :red) + "]"
+            puts color("FAILING", :red)
             puts "Waiting until the CI build is green to proceed."
             wait until remote_build_green?
             puts color("\nThe CI build has been fixed.", :green)
@@ -54,7 +55,7 @@ module Propel
         alert_broken_build_and_exit unless remote_build_green?
       end
 
-      puts "[" + color("PASSING", :green) + "]" unless waited_for_build
+      puts color("PASSING", :green) unless waited_for_build
     end
 
     def say_duration

@@ -11,7 +11,12 @@ module Propel
     def start
       if @repository.changed?
         if remote_build_configured?
-          check_remote_build! unless @options[:fix_ci]
+          
+          if @options[:fix_ci]
+            @logger.puts("Thanks for trying to fix the build!", :green)
+          else
+            check_remote_build!
+          end
 
         else
           @logger.warn "Remote build is not configured, you should point propel to the status URL of your CI server."
@@ -63,11 +68,12 @@ module Propel
       @logger.puts("FAILING", :red)
 
       msg = <<-EOS
-        The remote build is broken. If your commit fixes the build, run propel with the --fix-ci (-f) option.
-        If you're waiting for someone else to fix the build, use propel with --wait (-w).
+The remote build is broken. If your commit fixes the build, run propel with --fix-ci (-f).
+If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 
-      warn msg.split("\n").map(&:strip)
+      @logger.puts("")
+      warn msg
       exit 1
     end
 

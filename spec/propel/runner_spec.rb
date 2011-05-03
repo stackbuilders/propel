@@ -62,6 +62,7 @@ describe Propel::Runner do
     it "should call propel! when the remote build is failing if --fix-ci is specified" do
       runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return true
+      runner.logger.should_receive(:puts).with("Thanks for trying to fix the build!", :green)
       runner.stub!(:remote_build_passing?).and_return false
       runner.should_receive(:propel!)
 

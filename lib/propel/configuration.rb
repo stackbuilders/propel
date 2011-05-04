@@ -3,7 +3,7 @@ module Propel
 
     def initialize(command_line_arguments, repository)
       @command_line_options = command_line_arguments
-      @repository = repository
+      @repository           = repository
     end
 
     DEFAULTS = {
@@ -19,22 +19,26 @@ module Propel
       correct_color_setting!(opts)
     end
 
-    def correct_color_setting!(opts)
-      if opts[:color_enabled] && RUBY_PLATFORM =~ /mswin|mingw/
-        unless ENV['ANSICON']
-          warn "You must use ANSICON 1.31 or later (http://adoxa.110mb.com/ansicon/) to use colour on Windows"
-          opts[:color] = false
-        end
-      end
-      
-      opts
-    end
-
     def config_file
       File.join(@repository.project_root, ".propel")
     end
     
     private
+    def correct_color_setting!(opts)
+      if opts[:color] && ruby_platform =~ /mswin|mingw/
+        unless ENV['ANSICON']
+          warn "You must use ANSICON 1.31 or later (http://adoxa.110mb.com/ansicon/) to use colour on Windows"
+          opts[:color] = false
+        end
+      end
+
+      opts
+    end
+
+    def ruby_platform
+      RUBY_PLATFORM
+    end
+
     def options_from_config_file
       File.exist?(config_file) ? File.read(config_file).split : [ ]
     end

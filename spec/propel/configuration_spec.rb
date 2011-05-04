@@ -21,7 +21,14 @@ describe Propel::Configuration do
       configuration.stub!(:options_from_config_file).and_return([])
 
       configuration.options.should == { :rebase => true, :fix_ci => false, :verbose => false, :wait => false, :color => false }
-    end    
+    end
+
+    it "should correct the color setting if on a Windows 32 system that does not support color" do
+      configuration = Propel::Configuration.new(['--color', '--quiet'], Propel::GitRepository.new)
+      configuration.stub(:ruby_platform).and_return('mswin')
+      configuration.stub!(:warn)
+      configuration.options[:color].should be_false
+    end
   end
 
   describe "#config_file" do

@@ -1,19 +1,31 @@
 module Propel
   class GitRepository
+    Result = Struct.new(:result, :exitstatus)
+
     def self.changed?
       new.changed?
     end
 
     def project_root
-      git("rev-parse --show-toplevel")
+      git("rev-parse --show-toplevel").result
     end
 
     def changed?
       local_last_commit != remote_last_commit
     end
 
+    def pull(rebase)
+      pull_cmd = 'pull'
+      pull_cmd << ' --rebase' if rebase
+      git pull_cmd
+    end
+
+    def push
+      git 'push -q'
+    end
+
     def remote_config
-      git("config branch.#{current_branch}.remote").tap do |remote|
+      git("config branch.#{current_branch}.remote").result.tap do |remote|
         if remote.empty?
           warn  "We could not determine the remote repository for branch '#{current_branch}.' " +
                 "Please set it with git config branch.#{current_branch}.remote REMOTE_REPO."
@@ -23,7 +35,7 @@ module Propel
     end
 
     def merge_config
-      git("config branch.#{current_branch}.merge").tap do |merge|
+      git("config branch.#{current_branch}.merge").result.tap do |merge|
         if merge.empty?
           warn  "We could not determine the remote branch for local branch '#{current_branch}.' " +
                 "Please set it with git config branch.#{current_branch}.merge REMOTE_BRANCH."
@@ -34,24 +46,25 @@ module Propel
 
     private
     def git git_args
-      `git #{git_args}`.strip
+      output = `git #{git_args}`.strip
+      Result.new(output, $?)
     end
 
     def local_last_commit
-      git("rev-parse HEAD")
+      git("rev-parse HEAD").result
     end
 
     def remote_last_commit
       fetch!
-      git("ls-remote #{remote_config} #{merge_config}").gsub(/\t.*/, '')
+      git("ls-remote #{remote_config} #{merge_config}").result.gsub(/\t.*/, '')
     end
 
     def current_branch
-      git("branch").split("\n").detect{|l| l =~ /^\*/ }.gsub(/^\* /, '')
+      git("branch").result.split("\n").detect{|l| l =~ /^\*/ }.gsub(/^\* /, '')
     end
 
     def fetch!
-      git("fetch")
+      git 'fetch'
     end
   end
 end

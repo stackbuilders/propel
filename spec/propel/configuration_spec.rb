@@ -24,7 +24,7 @@ describe Propel::Configuration do
     end
 
     it "should correct the color setting if on a Windows 32 system that does not support color" do
-      configuration = Propel::Configuration.new(['--color', '--quiet'], Propel::GitRepository.new)
+      configuration = Propel::Configuration.new(['--color'], Propel::GitRepository.new)
       configuration.stub(:ruby_platform).and_return('mswin')
       configuration.stub!(:warn)
       configuration.options[:color].should be_false

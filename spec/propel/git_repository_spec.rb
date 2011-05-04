@@ -1,6 +1,20 @@
 require 'spec_helper'
 
 describe Propel::GitRepository do
+  describe "#pull" do
+    it "should use --rebase when argument is true" do
+      git_repository = Propel::GitRepository.new
+      git_repository.should_receive(:git).with("pull --rebase")
+      git_repository.pull(true)
+    end
+
+    it "should not use --rebase when argument as false" do
+      git_repository = Propel::GitRepository.new
+      git_repository.should_receive(:git).with("pull")
+      git_repository.pull(false)
+    end
+  end
+
   describe ".changed?" do
     it "should call #changed? on a new instance of the GitRepository" do
       git_repository = Propel::GitRepository.new
@@ -22,13 +36,13 @@ describe Propel::GitRepository do
     it "should return false when the remote branch has the same SHA1 as the local HEAD" do
       git_repository = Propel::GitRepository.new
       git_repository.stub!(:fetch!)
-      git_repository.stub!(:git).with("branch").and_return("* master\n  testbranch")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
 
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return("ef2c8125b1923950a9cd776298516ad9ed3eb568")
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return("origin")
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return("refs/heads/master")
+      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
+      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
+      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
 
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return("ef2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master")
+      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
 
       git_repository.should_not be_changed
     end
@@ -36,13 +50,13 @@ describe Propel::GitRepository do
     it "should return true when the remote branch has a different SHA1 than the local HEAD" do
       git_repository = Propel::GitRepository.new
       git_repository.stub!(:fetch!)
-      git_repository.stub!(:git).with("branch").and_return("* master\n  testbranch")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
 
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return("ef2c8125b1923950a9cd776298516ad9ed3eb568")
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return("origin")
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return("refs/heads/master")
+      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
+      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
+      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
 
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master")
+      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
 
       git_repository.should be_changed
     end
@@ -51,8 +65,8 @@ describe Propel::GitRepository do
   describe "#remote_config" do
     it "should call the git command to determine the remote repository" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:git).with("branch").and_return("* master\n  testbranch")
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return("origin")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
+      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
 
       git_repository.remote_config.should == 'origin'
     end
@@ -60,8 +74,8 @@ describe Propel::GitRepository do
     it "should raise an error if the remote repository cannot be determined" do
       git_repository = Propel::GitRepository.new
 
-      git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
-      git_repository.stub!(:git).with("config branch.foo.remote").and_return("")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* foo\n  testbranch", 0))
+      git_repository.stub!(:git).with("config branch.foo.remote").and_return(Propel::GitRepository::Result.new("", 0))
 
       git_repository.should_receive(:warn).with("We could not determine the remote repository for branch 'foo.' Please set it with git config branch.foo.remote REMOTE_REPO.")
       git_repository.should_receive(:exit).with(1)
@@ -73,8 +87,8 @@ describe Propel::GitRepository do
   describe "#merge_config" do
     it "should call the git command to determine the remote branch" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:git).with("branch").and_return("* master\n  testbranch")
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return("refs/heads/master")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
+      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
 
       git_repository.merge_config.should == 'refs/heads/master'
     end
@@ -82,8 +96,8 @@ describe Propel::GitRepository do
     it "should raise an error if the remote branch cannot be determined" do
       git_repository = Propel::GitRepository.new
 
-      git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
-      git_repository.stub!(:git).with("config branch.foo.merge").and_return("")
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* foo\n  testbranch", 0))
+      git_repository.stub!(:git).with("config branch.foo.merge").and_return(Propel::GitRepository::Result.new("", 0))
 
       git_repository.should_receive(:warn).with("We could not determine the remote branch for local branch 'foo.' Please set it with git config branch.foo.merge REMOTE_BRANCH.")
       git_repository.should_receive(:exit).with(1)

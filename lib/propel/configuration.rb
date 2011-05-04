@@ -44,7 +44,7 @@ module Propel
     end
 
     def parse(option_array)
-      Propel::OptionParser.parse!(option_array)
+      ::Propel::OptionParser.parse!(option_array)
     end
   end
 end

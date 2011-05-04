@@ -25,10 +25,6 @@ module Propel
           options[:fix_ci] = o
         end
 
-        parser.on('-q', '--[no-]quiet', 'Silences normal output messages.') do |o|
-          options[:quiet] = o
-        end
-
         parser.on('-r', '--[no-]rebase', 'Use pull with --rebase.  Rebase is used by default.') do |o|
           options[:rebase] = o
         end

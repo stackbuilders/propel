@@ -18,11 +18,19 @@ module Propel
     end
 
     def puts(message, color_sym = nil)
-      Kernel.puts color(message, color_sym) unless @configuration[:quiet]
+      Kernel.puts color(message, color_sym)
     end
 
     def warn(message, color_sym = nil)
-      Kernel.warn color(message, color_sym) unless @configuration[:quiet]
+      Kernel.warn color(message, color_sym)
+    end
+
+    def report_operation(message)
+      Kernel.print("%-60s" % "#{message}:")
+    end
+
+    def report_status(message, color_sym)
+      Kernel.puts("[ #{color(message.upcase, color_sym)} ]")
     end
 
     private

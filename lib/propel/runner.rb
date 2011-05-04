@@ -1,6 +1,6 @@
 module Propel
   class Runner
-    attr_reader :logger
+    attr_reader :logger, :repository
     
     def initialize(args = [ ])
       @repository = GitRepository.new
@@ -11,29 +11,29 @@ module Propel
     def start
       if @repository.changed?
         if remote_build_configured?
-          
+
           if @options[:fix_ci]
-            @logger.puts("Thanks for trying to fix the build!", :green)
+            logger.puts("Thanks for trying to fix the build!", :green)
           else
             check_remote_build!
           end
 
         else
-          @logger.warn "Remote build is not configured, you should point propel to the status URL of your CI server."
-          
+          logger.warn "Remote build is not configured, you should point propel to the status URL of your CI server."
+
         end
 
         propel!
       else
-        @logger.puts("There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.", :green)
-        
+        logger.puts("There is nothing to propel - your HEAD is identical to #{@repository.remote_config} #{@repository.merge_config}.", :green)
+
       end
     end
 
     private
 
     def check_remote_build!
-      @logger.print "CI server status:\t"
+      logger.report_operation "CI server status"
       STDOUT.flush
 
       waited_for_build = false
@@ -42,10 +42,10 @@ module Propel
           waited_for_build = true
           
           say_duration do
-            @logger.puts("FAILING", :red)
-            @logger.puts "Waiting until the CI build is green."
+            logger.report_status("FAILING", :red)
+            logger.puts "Waiting until the CI build is green."
             wait until remote_build_green?
-            @logger.puts("\nThe CI build has been fixed.", :green)
+            logger.puts("\nThe CI build has been fixed.", :green)
           end
         end
 
@@ -54,25 +54,25 @@ module Propel
         alert_broken_build_and_exit unless remote_build_green?
       end
 
-      @logger.puts("PASSING", :green) unless waited_for_build
+      logger.report_status("PASSING", :green) unless waited_for_build
     end
 
     def say_duration
       start_time = Time.now
       yield
       end_time = Time.now
-      @logger.puts("We waited for #{(end_time - start_time).round} seconds while the build was failing.")
+      logger.puts("We waited for #{(end_time - start_time).round} seconds while the build was failing.")
     end
 
     def alert_broken_build_and_exit
-      @logger.puts("FAILING", :red)
+      logger.puts("FAILING", :red)
 
       msg = <<-EOS
 The remote build is broken. If your commit fixes the build, run propel with --fix-ci (-f).
 If you're waiting for someone else to fix the build, use propel with --wait (-w).
       EOS
 
-      @logger.puts("")
+      logger.puts("")
       warn msg
       exit 1
     end
@@ -82,7 +82,7 @@ If you're waiting for someone else to fix the build, use propel with --wait (-w)
     end
 
     def wait
-      @logger.print(".", :yellow)
+      logger.print(".", :yellow)
       sleep 5
     end
 
@@ -91,9 +91,7 @@ If you're waiting for someone else to fix the build, use propel with --wait (-w)
     end
 
     def propel!
-      pull_cmd = 'git pull'
-      pull_cmd << ' --rebase' if @options[:rebase]
-      system [ pull_cmd, 'rake', 'git push' ].join(' && ')
+      Propel.new(@repository, @options[:rebase]).start
     end
   end
 end

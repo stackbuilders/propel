@@ -63,10 +63,10 @@ describe Propel::GitRepository do
       git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
       git_repository.stub!(:git).with("config branch.foo.remote").and_return("")
 
-      lambda {
-        git_repository.remote_config
-      }.should raise_error(RuntimeError,
-                           "We could not determine the remote repository for branch 'foo.' Please set it with git config branch.foo.remote REMOTE_REPO.")
+      git_repository.should_receive(:warn).with("We could not determine the remote repository for branch 'foo.' Please set it with git config branch.foo.remote REMOTE_REPO.")
+      git_repository.should_receive(:exit).with(1)
+
+      git_repository.remote_config
     end
   end
 
@@ -85,10 +85,9 @@ describe Propel::GitRepository do
       git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
       git_repository.stub!(:git).with("config branch.foo.merge").and_return("")
 
-      lambda {
-        git_repository.merge_config
-      }.should raise_error(RuntimeError,
-               "We could not determine the remote branch for local branch 'foo.' Please set it with git config branch.foo.merge REMOTE_BRANCH.")
+      git_repository.should_receive(:warn).with("We could not determine the remote branch for local branch 'foo.' Please set it with git config branch.foo.merge REMOTE_BRANCH.")
+      git_repository.should_receive(:exit).with(1)
+      git_repository.merge_config
     end
   end
 end

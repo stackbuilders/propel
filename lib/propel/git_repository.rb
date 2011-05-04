@@ -13,11 +13,21 @@ module Propel
     end
 
     def remote_config
-      git("config branch.#{current_branch}.remote")
+      git("config branch.#{current_branch}.remote").tap do |remote|
+        if remote.empty?
+          raise "We could not determine the remote repository for branch '#{current_branch}.' " +
+                "Please set it with git config branch.#{current_branch}.remote REMOTE_REPO."
+        end
+      end
     end
 
     def merge_config
-      git("config branch.#{current_branch}.merge")
+      git("config branch.#{current_branch}.merge").tap do |merge|
+        if merge.empty?
+          raise "We could not determine the remote branch for local branch '#{current_branch}.' " +
+                "Please set it with git config branch.#{current_branch}.merge REMOTE_BRANCH."
+        end
+      end
     end
 
     private

@@ -56,6 +56,18 @@ describe Propel::GitRepository do
 
       git_repository.remote_config.should == 'origin'
     end
+
+    it "should raise an error if the remote repository cannot be determined" do
+      git_repository = Propel::GitRepository.new
+
+      git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
+      git_repository.stub!(:git).with("config branch.foo.remote").and_return("")
+
+      lambda {
+        git_repository.remote_config
+      }.should raise_error(RuntimeError,
+                           "We could not determine the remote repository for branch 'foo.' Please set it with git config branch.foo.remote REMOTE_REPO.")
+    end
   end
 
   describe "#merge_config" do
@@ -65,6 +77,18 @@ describe Propel::GitRepository do
       git_repository.should_receive(:git).with("config branch.master.merge").and_return("refs/heads/master")
 
       git_repository.merge_config.should == 'refs/heads/master'
+    end
+
+    it "should raise an error if the remote branch cannot be determined" do
+      git_repository = Propel::GitRepository.new
+
+      git_repository.stub!(:git).with("branch").and_return("* foo\n  testbranch")
+      git_repository.stub!(:git).with("config branch.foo.merge").and_return("")
+
+      lambda {
+        git_repository.merge_config
+      }.should raise_error(RuntimeError,
+               "We could not determine the remote branch for local branch 'foo.' Please set it with git config branch.foo.merge REMOTE_BRANCH.")
     end
   end
 end

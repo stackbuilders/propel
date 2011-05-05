@@ -57,6 +57,18 @@ module Propel
       end
     end
 
+    def fetch!
+      logger.report_operation "Retrieving remote objects"
+
+      git(verbosity_for('fetch')).tap do |result|
+        if result.exitstatus != 0
+          exit_with_error "Fetch of remote repository failed, exiting."
+        end
+
+        logger.report_status("DONE", :green)
+      end
+    end
+
     private
     def exit_with_error(message)
       warn message
@@ -84,18 +96,6 @@ module Propel
 
     def verbosity_for(git_operation)
       @options[:verbose] ? git_operation : "#{git_operation} -q"
-    end
-
-    def fetch!
-      logger.report_operation "Retrieving remote objects"
-
-      git(verbosity_for('fetch')).tap do |result|
-        if result.exitstatus != 0
-          exit_with_error "Fetch of remote repository failed, exiting."
-        end
-
-        logger.report_status("DONE", :green)
-      end
     end
   end
 end

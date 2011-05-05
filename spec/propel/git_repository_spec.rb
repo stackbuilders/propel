@@ -54,23 +54,47 @@ describe Propel::GitRepository do
     end
   end
 
-  describe ".changed?" do
-    it "should call #changed? on a new instance of the GitRepository" do
-      git_repository = Propel::GitRepository.new
-      git_repository.should_receive(:changed?)
-      Propel::GitRepository.should_receive(:new).and_return git_repository
-      
-      Propel::GitRepository.changed?
-    end
-  end
-
   describe "#project_root" do
     it "should return the root of the project" do
       project_root = File.expand_path(File.join(File.dirname(__FILE__), %w[ .. .. ]))
       Propel::GitRepository.new.project_root.should == project_root
     end
   end
-  
+
+  describe ".changed?" do
+    it "should call #changed? on a new instance of the GitRepository" do
+      git_repository = Propel::GitRepository.new
+      git_repository.should_receive(:changed?)
+      Propel::GitRepository.should_receive(:new).and_return git_repository
+
+      Propel::GitRepository.changed?
+    end
+  end
+
+  describe "#fetch!" do
+    it "should exit with a not-0 status and warn the user if the fetch fails" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+
+      git_repository.should_receive(:git).with('fetch -q').and_return(Propel::GitRepository::Result.new('', 1))
+
+      git_repository.should_receive(:exit).with(1)
+      git_repository.should_receive(:warn).with('Fetch of remote repository failed, exiting.')
+
+      git_repository.fetch!
+    end
+
+    it "should call fetch without the quiet option (-q) if --verbose is specified" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+      git_repository.options = {:verbose => true}
+
+      git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 0))
+
+      git_repository.fetch!
+    end
+  end
+
   describe "#changed?" do
     it "should return false when the remote branch has the same SHA1 as the local HEAD" do
       git_repository = Propel::GitRepository.new
@@ -98,45 +122,6 @@ describe Propel::GitRepository do
       git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
 
       git_repository.should be_changed
-    end
-
-    it "should exit with a not-0 status and warn the user if the fetch fails" do
-      git_repository = Propel::GitRepository.new
-      git_repository.logger = stub_logger
-
-      git_repository.should_receive(:git).with('fetch -q').and_return(Propel::GitRepository::Result.new('', 1))
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
-
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
-
-      git_repository.should_receive(:exit).with(1)
-      git_repository.should_receive(:warn).with('Fetch of remote repository failed, exiting.')
-
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
-
-      git_repository.should be_changed
-    end
-
-    it "should use the verbose option for fetch if --verbose is specified" do
-      git_repository = Propel::GitRepository.new
-      git_repository.logger = stub_logger
-      git_repository.options = {:verbose => true}
-
-      git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 1))
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
-
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
-
-      git_repository.should_receive(:exit).with(1)
-      git_repository.should_receive(:warn).with('Fetch of remote repository failed, exiting.')
-
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
-
-      git_repository.changed?
     end
   end
 

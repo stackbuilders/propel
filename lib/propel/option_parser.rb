@@ -17,15 +17,15 @@ module Propel
       ::OptionParser.new do |parser|
         parser.banner = "Usage: propel [options]\n\n"
 
-        parser.on('-c', '--[no-]color', '--[no-]colour', 'Turn on or off colored output. Color is off by default.') do |o|
+        parser.on('-c', '--[no-]color', '--[no-]colour', 'Toggle colored output. Color is off by default.') do |o|
           options[:color] = o
         end
 
-        parser.on('-f', '--fix-ci', 'Use when fixing the CI build') do |o|
+        parser.on('-f', '--fix-ci', 'When CI is broken use --fix-ci to fix the build.') do |o|
           options[:fix_ci] = o
         end
 
-        parser.on('-r', '--[no-]rebase', 'Use pull with --rebase.  Rebase is used by default.') do |o|
+        parser.on('-r', '--[no-]rebase', 'Use --no-rebase when you don\'t want to rebase.  Rebase is used by default.') do |o|
           options[:rebase] = o
         end
 

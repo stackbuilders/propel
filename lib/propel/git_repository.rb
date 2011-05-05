@@ -2,7 +2,11 @@ module Propel
   class GitRepository
     Result = Struct.new(:result, :exitstatus)
 
-    attr_accessor :logger
+    attr_accessor :logger, :options
+
+    def initialize
+      @options = { :verbose => false }
+    end
 
     def self.changed?
       new.changed?
@@ -25,7 +29,7 @@ module Propel
     def push
       logger.report_operation "Pushing to #{remote_config} #{merge_config}"
 
-      git('push -q').tap do
+      git(verbosity_for('push')).tap do
         logger.report_status('DONE', :green)
       end
     end
@@ -66,15 +70,18 @@ module Propel
     end
 
     def current_branch
-      # TODO - replace with:
-      # git symbolic-ref HEAD
+      # TODO - replace with git symbolic-ref HEAD
       git("branch").result.split("\n").detect{|l| l =~ /^\*/ }.gsub(/^\* /, '')
+    end
+
+    def verbosity_for(git_operation)
+      @options[:verbose] ? git_operation : "#{git_operation} -q"
     end
 
     def fetch!
       logger.report_operation "Retrieving remote objects"
 
-      git('fetch -q').tap do |result|
+      git(verbosity_for('fetch')).tap do |result|
         if result.exitstatus != 0
           warn "Fetch of remote repository failed, exiting."
           exit 1

@@ -15,6 +15,30 @@ describe Propel::GitRepository do
     end
   end
 
+  describe "#push" do
+    it "should call 'push -q' by default" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+
+      git_repository.should_receive(:git).with('push -q')
+      git_repository.stub!(:remote_config)
+      git_repository.stub!(:merge_config)
+
+      git_repository.push
+    end
+    
+    it "should call push without -q if --verbose is specified" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+      git_repository.options = {:verbose => true}
+      
+      git_repository.should_receive(:git).with('push')
+      git_repository.stub!(:remote_config)
+      git_repository.stub!(:merge_config)
+      git_repository.push
+    end
+  end
+
   describe ".changed?" do
     it "should call #changed? on a new instance of the GitRepository" do
       git_repository = Propel::GitRepository.new
@@ -78,6 +102,26 @@ describe Propel::GitRepository do
       git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
 
       git_repository.should be_changed
+    end
+
+    it "should use the verbose option for fetch if --verbose is specified" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+      git_repository.options = {:verbose => true}
+
+      git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 1))
+      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
+
+      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
+      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
+      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
+
+      git_repository.should_receive(:exit).with(1)
+      git_repository.should_receive(:warn).with('Fetch of remote repository failed, exiting.')
+
+      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
+
+      git_repository.changed?
     end
   end
 

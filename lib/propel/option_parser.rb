@@ -29,8 +29,12 @@ module Propel
           options[:rebase] = o
         end
 
-        parser.on('-s', '--status-url STATUS_URL', 'Location of build status feed') do |build_status_url|
+        parser.on('-s', '--status-url STATUS_URL', 'Location of build status feed.') do |build_status_url|
           options[:status_url] = build_status_url
+        end
+
+        parser.on('-v', '--[no-]verbose', 'Turn on verbose output from git.') do |o|
+          options[:verbose] = o
         end
 
         parser.on('-w', '--[no-]wait', 'Waits for fixes to remote build.') do |o|

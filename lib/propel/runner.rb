@@ -7,7 +7,8 @@ module Propel
       @options    = Configuration.new(args, @repository).options
       @logger     = Logger.new(@options)
 
-      @repository.logger = @logger
+      @repository.logger  = @logger
+      @repository.options = @options
     end
 
     def start

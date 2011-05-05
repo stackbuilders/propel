@@ -63,6 +63,8 @@ describe Propel::GitRepository do
 
     it "should exit with a not-0 status and warn the user if the fetch fails" do
       git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+
       git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 1))
       git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
 

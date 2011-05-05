@@ -2,6 +2,8 @@ module Propel
   class GitRepository
     Result = Struct.new(:result, :exitstatus)
 
+    attr_accessor :logger
+
     def self.changed?
       new.changed?
     end
@@ -66,10 +68,14 @@ module Propel
     end
 
     def fetch!
+      logger.report_operation "Retrieving remote objects"
+
       git('fetch').tap do |result|
         if result.exitstatus != 0
           warn "Fetch of remote repository failed, exiting."
           exit 1
+        else
+          logger.report_status("DONE", :green)
         end
       end
     end

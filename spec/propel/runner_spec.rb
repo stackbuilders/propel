@@ -8,10 +8,6 @@ describe Propel::Runner do
   end
 
   describe ".start" do
-    def stub_logger
-      double('logger', :report_operation => true, :report_status => true, :puts => true, :warn => true)
-    end
-
     it "should not call propel! if there is nothing to push" do
       runner = Propel::Runner.new
       runner.stub!(:logger).and_return(stub_logger)

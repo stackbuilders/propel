@@ -27,6 +27,7 @@ module Propel
 
     def report_operation(message)
       Kernel.print("%-60s" % "#{message}:")
+      STDOUT.flush
     end
 
     def report_status(message, color_sym)

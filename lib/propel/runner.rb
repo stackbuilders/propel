@@ -6,6 +6,8 @@ module Propel
       @repository = GitRepository.new
       @options    = Configuration.new(args, @repository).options
       @logger     = Logger.new(@options)
+
+      @repository.logger = @logger
     end
 
     def start
@@ -34,7 +36,6 @@ module Propel
 
     def check_remote_build!
       logger.report_operation "CI server status"
-      STDOUT.flush
 
       waited_for_build = false
       if @options[:wait]

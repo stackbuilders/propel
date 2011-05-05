@@ -60,11 +60,18 @@ module Propel
     end
 
     def current_branch
+      # TODO - replace with:
+      # git symbolic-ref HEAD
       git("branch").result.split("\n").detect{|l| l =~ /^\*/ }.gsub(/^\* /, '')
     end
 
     def fetch!
-      git 'fetch'
+      git('fetch').tap do |result|
+        if result.exitstatus != 0
+          warn "Fetch of remote repository failed, exiting."
+          exit 1
+        end
+      end
     end
   end
 end

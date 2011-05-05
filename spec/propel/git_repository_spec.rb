@@ -20,7 +20,7 @@ describe Propel::GitRepository do
       git_repository = Propel::GitRepository.new
       git_repository.logger = stub_logger
 
-      git_repository.should_receive(:git).with('push -q')
+      git_repository.should_receive(:git).with('push -q').and_return(Propel::GitRepository::Result.new('all good', 0))
       git_repository.stub!(:remote_config)
       git_repository.stub!(:merge_config)
 
@@ -32,9 +32,24 @@ describe Propel::GitRepository do
       git_repository.logger = stub_logger
       git_repository.options = {:verbose => true}
       
-      git_repository.should_receive(:git).with('push')
+      git_repository.should_receive(:git).with('push').and_return(Propel::GitRepository::Result.new('all good', 0))
       git_repository.stub!(:remote_config)
       git_repository.stub!(:merge_config)
+      git_repository.push
+    end
+
+    it "should warn the user and exit with a status of 1 if the push fails" do
+      git_repository = Propel::GitRepository.new
+      git_repository.logger = stub_logger
+
+      git_repository.should_receive(:git).with('push -q').and_return(Propel::GitRepository::Result.new('bad!', 1))
+      
+      git_repository.stub!(:remote_config)
+      git_repository.stub!(:merge_config)
+
+      git_repository.should_receive(:warn).with("Your push failed!  Please try again later.")
+      git_repository.should_receive(:exit).with(1)
+      
       git_repository.push
     end
   end

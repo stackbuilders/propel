@@ -29,7 +29,12 @@ module Propel
     def push
       logger.report_operation "Pushing to #{remote_config} #{merge_config}"
 
-      git(verbosity_for('push')).tap do
+      git(verbosity_for('push')).tap do |result|
+        if result.exitstatus != 0
+          logger.report_status("FAILING", :red)
+          exit_with_error "Your push failed!  Please try again later."
+        end
+
         logger.report_status('DONE', :green)
       end
     end
@@ -37,9 +42,8 @@ module Propel
     def remote_config
       git("config branch.#{current_branch}.remote").result.tap do |remote|
         if remote.empty?
-          warn  "We could not determine the remote repository for branch '#{current_branch}.' " +
-                "Please set it with git config branch.#{current_branch}.remote REMOTE_REPO."
-          exit 1
+          exit_with_error  "We could not determine the remote repository for branch '#{current_branch}.' " +
+                           "Please set it with git config branch.#{current_branch}.remote REMOTE_REPO."
         end
       end
     end
@@ -47,14 +51,18 @@ module Propel
     def merge_config
       git("config branch.#{current_branch}.merge").result.tap do |merge|
         if merge.empty?
-          warn  "We could not determine the remote branch for local branch '#{current_branch}.' " +
-                "Please set it with git config branch.#{current_branch}.merge REMOTE_BRANCH."
-          exit 1
+          exit_with_error  "We could not determine the remote branch for local branch '#{current_branch}.' " +
+                           "Please set it with git config branch.#{current_branch}.merge REMOTE_BRANCH."
         end
       end
     end
 
     private
+    def exit_with_error(message)
+      warn message
+      exit 1
+    end
+
     def git git_args
       output = `git #{git_args}`.strip
       Result.new(output, $?)
@@ -83,11 +91,10 @@ module Propel
 
       git(verbosity_for('fetch')).tap do |result|
         if result.exitstatus != 0
-          warn "Fetch of remote repository failed, exiting."
-          exit 1
-        else
-          logger.report_status("DONE", :green)
+          exit_with_error "Fetch of remote repository failed, exiting."
         end
+
+        logger.report_status("DONE", :green)
       end
     end
   end

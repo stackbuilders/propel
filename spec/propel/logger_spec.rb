@@ -29,9 +29,15 @@ describe Propel::Logger do
   end
 
   describe "#report_operation" do
-    it "should return a formatted string" do
+    it "should return a formatted string by default" do
       logger = Propel::Logger.new({:color => true})
       Kernel.should_receive(:print).with("Doing something:                                            ")
+      logger.report_operation('Doing something')
+    end
+
+    it "should print a string with an ellipsis at the end when verbose is true" do
+      logger = Propel::Logger.new({:verbose => true})
+      Kernel.should_receive(:puts).with("Doing something...")
       logger.report_operation('Doing something')
     end
   end
@@ -40,6 +46,12 @@ describe Propel::Logger do
     it "should return a formatted, colorized string" do
       logger = Propel::Logger.new({:color => true})
       Kernel.should_receive(:puts).with("[ \e[31mDONE\e[0m ]")
+      logger.report_status('done', :red)
+    end
+
+    it "should print a string that can appear on its own output line when verbose is true" do
+      logger = Propel::Logger.new({:color => true, :verbose => true})
+      Kernel.should_receive(:puts).with("\e[31mDone\e[0m")
       logger.report_status('done', :red)
     end
   end

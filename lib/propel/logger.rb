@@ -26,12 +26,20 @@ module Propel
     end
 
     def report_operation(message)
-      Kernel.print("%-60s" % "#{message}:")
-      STDOUT.flush
+      if @configuration[:verbose]
+        Kernel.puts("#{message}...")
+      else
+        Kernel.print("%-60s" % "#{message}:")
+        STDOUT.flush
+      end
     end
 
     def report_status(message, color_sym)
-      Kernel.puts("[ #{color(message.upcase, color_sym)} ]")
+      if @configuration[:verbose]
+        Kernel.puts(color(message.capitalize, color_sym))
+      else
+        Kernel.puts("[ #{color(message.upcase, color_sym)} ]")
+      end
     end
 
     private

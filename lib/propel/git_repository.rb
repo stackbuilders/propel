@@ -23,7 +23,11 @@ module Propel
     end
 
     def push
-      git 'push -q'
+      logger.report_operation "Pushing to #{remote_config} #{merge_config}"
+
+      git('push -q').tap do
+        logger.report_status('DONE', :green)
+      end
     end
 
     def remote_config

@@ -6,7 +6,9 @@ module Propel
     end
 
     def start
-      @repository.pull(@rebase) && rake && @repository.push
+      ( @repository.pull(@rebase).exitstatus == 0 ) &&
+          rake &&
+          @repository.push
     end
 
     private

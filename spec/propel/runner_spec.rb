@@ -47,7 +47,7 @@ describe Propel::Runner do
       runner.should_receive(:propel!)
       runner.stub!(:logger).and_return(stub_logger)
 
-      runner.logger.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.logger.should_receive(:warn).with("Remote build is not configured. You should point propel to the status URL of your CI server.")
 
       runner.start
     end
@@ -82,7 +82,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new %w[ --fix-ci ]
       runner.stub!(:remote_build_configured?).and_return false
 
-      runner.logger.should_receive(:warn).with("Remote build is not configured, you should point propel to the status URL of your CI server.")
+      runner.logger.should_receive(:warn).with("Remote build is not configured. You should point propel to the status URL of your CI server.")
       runner.should_receive(:propel!)
 
       runner.start

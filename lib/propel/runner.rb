@@ -22,7 +22,7 @@ module Propel
           end
 
         else
-          logger.warn "Remote build is not configured, you should point propel to the status URL of your CI server."
+          logger.warn "Remote build is not configured. You should point propel to the status URL of your CI server."
 
         end
 

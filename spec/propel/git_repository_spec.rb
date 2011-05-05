@@ -65,7 +65,7 @@ describe Propel::GitRepository do
       git_repository = Propel::GitRepository.new
       git_repository.logger = stub_logger
 
-      git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 1))
+      git_repository.should_receive(:git).with('fetch -q').and_return(Propel::GitRepository::Result.new('', 1))
       git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
 
       git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))

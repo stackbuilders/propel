@@ -74,7 +74,7 @@ module Propel
     def fetch!
       logger.report_operation "Retrieving remote objects"
 
-      git('fetch').tap do |result|
+      git('fetch -q').tap do |result|
         if result.exitstatus != 0
           warn "Fetch of remote repository failed, exiting."
           exit 1

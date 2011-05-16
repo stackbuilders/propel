@@ -21,6 +21,8 @@ module Propel
     end
 
     def pull(rebase)
+      exit_with_error('You are operating with a detached HEAD, aborting.') if current_branch == '(no branch)'
+      
       pull_cmd = 'pull'
       pull_cmd << ' --rebase' if rebase
       git pull_cmd
@@ -102,7 +104,6 @@ module Propel
     end
 
     def current_branch
-      # TODO - replace with git symbolic-ref HEAD
       git("branch").result.split("\n").detect{|l| l =~ /^\*/ }.gsub(/^\* /, '')
     end
 

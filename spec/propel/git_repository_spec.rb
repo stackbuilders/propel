@@ -4,12 +4,16 @@ describe Propel::GitRepository do
   describe "#pull" do
     it "should use --rebase when argument is true" do
       git_repository = Propel::GitRepository.new
+      git_repository.stub!(:current_branch).and_return('master')
       git_repository.should_receive(:git).with("pull --rebase")
+
       git_repository.pull(true)
     end
 
     it "should not use --rebase when argument as false" do
       git_repository = Propel::GitRepository.new
+      git_repository.stub!(:current_branch).and_return('master')
+
       git_repository.should_receive(:git).with("pull")
       git_repository.pull(false)
     end
@@ -17,10 +21,27 @@ describe Propel::GitRepository do
     describe "when the process exits with a non-zero exit status" do
       it "should print the process stdout to the console and exit with the exit code of the process" do
         git_repository = Propel::GitRepository.new
+        git_repository.stub!(:current_branch).and_return('master')
+
         git_repository.should_receive(:run_command).with('pull --rebase').and_return([ 'my message', 127 ])
         git_repository.should_receive(:exit).with(127)
         git_repository.should_receive(:puts).with('my message')
         git_repository.pull(true)
+      end
+    end
+
+    describe "when in detached HEAD state" do
+      class DetachedHeadTrap < StandardError ; end
+      
+      it "should warn the user and exit with a status of 1" do
+        git_repository = Propel::GitRepository.new
+        git_repository.should_not_receive(:run_command).with('pull --rebase')
+        git_repository.stub!(:current_branch).and_return('(no branch)')
+        git_repository.should_receive(:exit_with_error).with('You are operating with a detached HEAD, aborting.').and_raise(DetachedHeadTrap)
+
+        lambda {
+          git_repository.pull(true)
+        }.should raise_error(DetachedHeadTrap)
       end
     end
   end

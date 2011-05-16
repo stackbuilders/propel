@@ -12,6 +12,8 @@ module Propel
     end
 
     def start
+      @repository.ensure_attached_head!
+
       if @repository.changed?
         if remote_build_configured?
 

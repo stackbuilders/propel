@@ -8,6 +8,20 @@ describe Propel::Runner do
   end
 
   describe ".start" do
+    class DetachedHeadTrap < StandardError ; end
+
+    it "should not call propel! if HEAD is detached" do
+      runner = Propel::Runner.new
+      runner.stub!(:logger).and_return(stub_logger)
+      @git_repository.stub!(:ensure_attached_head!).and_raise(DetachedHeadTrap)
+
+      runner.should_not_receive(:propel!)
+
+      lambda {
+        runner.start
+      }.should raise_error(DetachedHeadTrap)
+    end
+    
     it "should not call propel! if there is nothing to push" do
       runner = Propel::Runner.new
       runner.stub!(:logger).and_return(stub_logger)

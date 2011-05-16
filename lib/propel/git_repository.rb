@@ -20,9 +20,11 @@ module Propel
       local_last_commit != remote_last_commit
     end
 
-    def pull(rebase)
+    def ensure_attached_head!
       exit_with_error('You are operating with a detached HEAD, aborting.') if current_branch == '(no branch)'
-      
+    end
+
+    def pull(rebase)
       pull_cmd = 'pull'
       pull_cmd << ' --rebase' if rebase
       git pull_cmd

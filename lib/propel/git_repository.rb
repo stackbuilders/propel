@@ -86,7 +86,7 @@ module Propel
         Result.new(output, exitcode)
         
       else
-        puts output
+        logger.puts output
         exit exitcode
       end
     end

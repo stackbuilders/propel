@@ -19,10 +19,11 @@ describe Propel::GitRepository do
     describe "when the process exits with a non-zero exit status" do
       it "should print the process stdout to the console and exit with the exit code of the process" do
         git_repository = Propel::GitRepository.new
+        git_repository.logger = stub_logger
 
         git_repository.should_receive(:run_command).with('pull --rebase').and_return([ 'my message', 127 ])
         git_repository.should_receive(:exit).with(127)
-        git_repository.should_receive(:puts).with('my message')
+        git_repository.logger.should_receive(:puts).with('my message')
         git_repository.pull(true)
       end
     end

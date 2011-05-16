@@ -76,8 +76,20 @@ module Propel
     end
 
     def git git_args
-      output = `git #{git_args}`.strip
-      Result.new(output, $?)
+      output, exitcode = run_command(git_args)
+
+      if exitcode == 0
+        Result.new(output, exitcode)
+        
+      else
+        puts output
+        exit exitcode
+      end
+    end
+
+    def run_command(cmd)
+      output = `git #{cmd}`.strip
+      [ output, $?.exitstatus ]
     end
 
     def local_last_commit

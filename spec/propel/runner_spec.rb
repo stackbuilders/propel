@@ -28,7 +28,10 @@ describe Propel::Runner do
 
       @git_repository.should_receive(:changed?).and_return(false)
       runner.should_not_receive(:propel!)
-      runner.start
+      lambda {
+        runner.start
+      }.should raise_error(SystemExit)
+      
     end
 
     it "should call propel! if there are changes to the current branch" do

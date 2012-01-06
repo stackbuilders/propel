@@ -1,4 +1,5 @@
-# Propel
+# Propel [![Build Status](https://secure.travis-ci.org/stackbuilders/propel.png)](http://travis-ci.org/stackbuilders/propel)
+
 
 Propel is a command that helps you to push to remote repositories while following best practices for
 continuous integration.  We believe that before you push to a shared git repository, you should check that

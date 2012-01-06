@@ -1,7 +1,7 @@
 module Propel
   class Runner
     attr_reader :logger, :repository
-    
+
     def initialize(args = [ ])
       @repository = GitRepository.new
       @options    = Configuration.new(args, @repository).options
@@ -44,7 +44,7 @@ module Propel
       if @options[:wait]
         unless remote_build_green?
           waited_for_build = true
-          
+
           say_duration do
             logger.report_status("FAILING", :red)
             logger.puts "Waiting until the CI build is green."
@@ -54,7 +54,7 @@ module Propel
         end
 
       else
-        
+
         alert_broken_build_and_exit unless remote_build_green?
       end
 

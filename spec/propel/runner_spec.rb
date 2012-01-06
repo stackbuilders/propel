@@ -5,6 +5,7 @@ describe Propel::Runner do
     @git_repository = Propel::GitRepository.new
     Propel::GitRepository.should_receive(:new).and_return(@git_repository)
     @git_repository.stub!(:changed?).and_return(true)
+    @git_repository.stub!(:current_branch).and_return("HEAD")
   end
 
   describe ".start" do
@@ -21,7 +22,7 @@ describe Propel::Runner do
         runner.start
       }.should raise_error(DetachedHeadTrap)
     end
-    
+
     it "should not call propel! if there is nothing to push" do
       runner = Propel::Runner.new
       runner.stub!(:logger).and_return(stub_logger)
@@ -31,7 +32,6 @@ describe Propel::Runner do
       lambda {
         runner.start
       }.should raise_error(SystemExit)
-      
     end
 
     it "should call propel! if there are changes to the current branch" do
@@ -48,7 +48,7 @@ describe Propel::Runner do
 
     it "should call propel! if the remote build is configured and passing" do
       runner = Propel::Runner.new(%w[ --status-url http://ci.example.com/status ])
-      
+
       runner.stub!(:remote_build_configured?).and_return(true)
       runner.stub!(:remote_build_green?).and_return(true)
 
@@ -79,7 +79,7 @@ describe Propel::Runner do
       runner.should_not_receive(:propel!)
 
       runner.stub!(:logger).and_return(stub_logger)
-      
+
       lambda {
         runner.start
       }.should raise_error(TestError)
@@ -109,7 +109,7 @@ describe Propel::Runner do
       runner = Propel::Runner.new(%w[--wait])
       runner.stub!(:remote_build_configured?).and_return true
       runner.stub!(:logger).and_return(stub_logger)
-      
+
       runner.should_receive(:remote_build_green?).twice.and_return(false, true)
 
       runner.should_receive(:say_duration).and_yield

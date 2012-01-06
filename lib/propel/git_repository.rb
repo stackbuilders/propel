@@ -74,6 +74,7 @@ module Propel
     end
 
     private
+
     def exit_with_error(message)
       warn message
       exit 1
@@ -84,7 +85,7 @@ module Propel
 
       if exitcode == 0
         Result.new(output, exitcode)
-        
+
       else
         logger.puts output
         exit exitcode

@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe Propel::Runner do
   before do
-    @git_repository = Propel::GitRepository.new
+    @git_repository = mock('git repository', :changed? => true, :project_root => '/tmp/foobar', :current_branch => 'master', 
+                                             :logger= => nil, :options= => nil, :ensure_attached_head! => true)
+    
     Propel::GitRepository.should_receive(:new).and_return(@git_repository)
-    @git_repository.stub!(:changed?).and_return(true)
-    @git_repository.stub!(:current_branch).and_return("HEAD")
   end
 
   describe ".start" do
@@ -28,10 +28,12 @@ describe Propel::Runner do
       runner.stub!(:logger).and_return(stub_logger)
 
       @git_repository.should_receive(:changed?).and_return(false)
+      @git_repository.stub!(:remote_config).and_return('REMOTE REPO')
+      @git_repository.stub!(:merge_config).and_return('MERGE CONFIG')
+
       runner.should_not_receive(:propel!)
-      lambda {
-        runner.start
-      }.should raise_error(SystemExit)
+      
+      runner.start
     end
 
     it "should call propel! if there are changes to the current branch" do

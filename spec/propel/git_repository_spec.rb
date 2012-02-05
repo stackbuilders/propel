@@ -18,11 +18,16 @@ describe Propel::GitRepository do
 
     describe "when the process exits with a non-zero exit status" do
       it "should print the process stdout to the console and exit with the exit code of the process" do
+        stub_shell do
+          command 'git pull --rebase' do
+            stdout 'my message'
+            exitstatus 127
+          end
+        end
+        
         git_repository = Propel::GitRepository.new
         git_repository.logger = stub_logger
 
-        git_repository.should_receive(:run_command).with('pull --rebase').and_return([ 'my message', 127 ])
-        git_repository.should_receive(:exit).with(127)
         git_repository.logger.should_receive(:puts).with('my message')
         git_repository.pull(true)
       end
@@ -34,7 +39,8 @@ describe Propel::GitRepository do
 
     it "should warn the user and exit with a status of 1 when the head is detached" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:current_branch).and_return('(no branch)')
+      
+      stub_shell { command('git branch') { stdout "* (no branch)\nmaster\n"  } }
       git_repository.should_receive(:exit_with_error).with('You are operating with a detached HEAD, aborting.').and_raise(DetachedHeadTrap)
 
       lambda {
@@ -44,7 +50,7 @@ describe Propel::GitRepository do
 
     it "should not exit when on master branch" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:current_branch).and_return('master')
+      stub_shell { command('git branch') { stdout "* master\notherbranch\n"  } }
       git_repository.should_not_receive(:exit_with_error)
 
       lambda {
@@ -80,21 +86,23 @@ describe Propel::GitRepository do
       git_repository = Propel::GitRepository.new
       git_repository.logger = stub_logger
 
-      git_repository.should_receive(:git).with('push -q').and_return(Propel::GitRepository::Result.new('bad!', 1))
+      stub_shell { command('git push -q') { exitstatus 1; stdout 'it failed'  } }
       
       git_repository.stub!(:remote_config)
       git_repository.stub!(:merge_config)
 
       git_repository.should_receive(:warn).with("Your push failed!  Please try again later.")
-      git_repository.should_receive(:exit).with(1)
       
-      git_repository.push
+      lambda {
+        git_repository.push  
+      }.should raise_error(SystemExit)      
     end
   end
 
   describe "#project_root" do
     it "should return the root of the project" do
       project_root = File.expand_path(File.join(File.dirname(__FILE__), %w[ .. .. ]))
+      stub_shell { command('git rev-parse --show-toplevel') { exitstatus 0; stdout project_root } }
       Propel::GitRepository.new.project_root.should == project_root
     end
   end
@@ -114,12 +122,10 @@ describe Propel::GitRepository do
       git_repository = Propel::GitRepository.new
       git_repository.logger = stub_logger
 
-      git_repository.should_receive(:git).with('fetch -q').and_return(Propel::GitRepository::Result.new('', 1))
-
-      git_repository.should_receive(:exit).with(1)
+      stub_shell { command('git fetch -q') { exitstatus 1; stdout 'it failed!'  } }
       git_repository.should_receive(:warn).with('Fetch of remote repository failed, exiting.')
 
-      git_repository.fetch!
+      lambda { git_repository.fetch! }.should raise_error SystemExit
     end
 
     it "should call fetch without the quiet option (-q) if --verbose is specified" do
@@ -127,7 +133,7 @@ describe Propel::GitRepository do
       git_repository.logger = stub_logger
       git_repository.options = {:verbose => true}
 
-      git_repository.should_receive(:git).with('fetch').and_return(Propel::GitRepository::Result.new('', 0))
+      stub_shell { command('git fetch') { stdout 'it worked!'  } }
 
       git_repository.fetch!
     end
@@ -136,29 +142,33 @@ describe Propel::GitRepository do
   describe "#changed?" do
     it "should return false when the remote branch has the same SHA1 as the local HEAD" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:fetch!)
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
+      git_repository.logger = stub_logger
 
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
-
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
+      stub_shell { 
+        command('git fetch -q') { stdout 'ok, I fetched' }
+        command('git branch') { stdout "* master\n  testbranch"  }
+        command('git rev-parse HEAD') { stdout "ef2c8125b1923950a9cd776298516ad9ed3eb568\n"  }
+        command('git config branch.master.remote') { stdout "origin\n"  }
+        command('git config branch.master.merge') { stdout "refs/heads/master\n"  }
+        command('git ls-remote origin refs/heads/master') { stdout "ef2c8125b1923950a9cd776298516ad9ed3eb568\n"  }
+      }
 
       git_repository.should_not be_changed
     end
 
     it "should return true when the remote branch has a different SHA1 than the local HEAD" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:fetch!)
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
-
-      git_repository.should_receive(:git).with("rev-parse HEAD").and_return(Propel::GitRepository::Result.new("ef2c8125b1923950a9cd776298516ad9ed3eb568", 0))
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
-
-      git_repository.should_receive(:git).with("ls-remote origin refs/heads/master").and_return(Propel::GitRepository::Result.new("bf2c8125b1923950a9cd776298516ad9ed3eb568\trefs/heads/master", 0))
-
+      git_repository.logger = stub_logger
+      
+      stub_shell { 
+        command('git fetch -q') { stdout 'ok, I fetched' }
+        command('git branch') { stdout "* master\n  testbranch"  }
+        command('git rev-parse HEAD') { stdout "ef2c8125b1923950a9cd776298516ad9ed3eb568\n"  }
+        command('git config branch.master.remote') { stdout "origin\n"  }
+        command('git config branch.master.merge') { stdout "refs/heads/master\n"  }
+        command('git ls-remote origin refs/heads/master') { stdout "bf2c8125b1923950a9cd776298516ad9ed3eb568\n"  }
+      }
+      
       git_repository.should be_changed
     end
   end
@@ -166,8 +176,10 @@ describe Propel::GitRepository do
   describe "#remote_config" do
     it "should call the git command to determine the remote repository" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
-      git_repository.should_receive(:git).with("config branch.master.remote").and_return(Propel::GitRepository::Result.new("origin", 0))
+      stub_shell { 
+        command('git branch') { stdout "* master\n  testbranch"  } 
+        command('git config branch.master.remote') { stdout "origin\n"  }
+      }
 
       git_repository.remote_config.should == 'origin'
     end
@@ -175,34 +187,39 @@ describe Propel::GitRepository do
     it "should raise an error if the remote repository cannot be determined" do
       git_repository = Propel::GitRepository.new
 
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* foo\n  testbranch", 0))
-      git_repository.stub!(:git).with("config branch.foo.remote").and_return(Propel::GitRepository::Result.new("", 0))
+      stub_shell { 
+        command('git branch') { stdout "* foo\n  testbranch"  } 
+        command('git config branch.foo.remote') { stdout "\n"  }
+      }
 
       git_repository.should_receive(:warn).with("We could not determine the remote repository for branch 'foo.' Please set it with git config branch.foo.remote REMOTE_REPO.")
-      git_repository.should_receive(:exit).with(1)
 
-      git_repository.remote_config
+      lambda { git_repository.remote_config }.should raise_error SystemExit
     end
   end
 
   describe "#merge_config" do
     it "should call the git command to determine the remote branch" do
       git_repository = Propel::GitRepository.new
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* master\n  testbranch", 0))
-      git_repository.should_receive(:git).with("config branch.master.merge").and_return(Propel::GitRepository::Result.new("refs/heads/master", 0))
-
+      
+      stub_shell { 
+        command('git branch') { stdout "* master\n  testbranch"  } 
+        command('git config branch.master.merge') { stdout "refs/heads/master\n"  }
+      }
+      
       git_repository.merge_config.should == 'refs/heads/master'
     end
 
     it "should raise an error if the remote branch cannot be determined" do
       git_repository = Propel::GitRepository.new
 
-      git_repository.stub!(:git).with("branch").and_return(Propel::GitRepository::Result.new("* foo\n  testbranch", 0))
-      git_repository.stub!(:git).with("config branch.foo.merge").and_return(Propel::GitRepository::Result.new("", 0))
-
+      stub_shell { 
+        command('git branch') { stdout "* foo\n  testbranch"  } 
+        command('git config branch.foo.merge') { stdout "\n"  }
+      }
+      
       git_repository.should_receive(:warn).with("We could not determine the remote branch for local branch 'foo.' Please set it with git config branch.foo.merge REMOTE_BRANCH.")
-      git_repository.should_receive(:exit).with(1)
-      git_repository.merge_config
+      lambda { git_repository.merge_config }.should raise_error SystemExit
     end
   end
 end

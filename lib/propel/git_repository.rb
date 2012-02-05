@@ -82,14 +82,9 @@ module Propel
 
     def git git_args
       output, exitcode = run_command(git_args)
-
-      if exitcode == 0
-        Result.new(output, exitcode)
-
-      else
-        logger.puts output
-        exit exitcode
-      end
+      logger.puts(output) unless exitcode == 0
+      
+      Result.new(output, exitcode)
     end
 
     def run_command(cmd)

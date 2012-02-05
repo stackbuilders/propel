@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    propel (0.4.2)
+    propel (0.4.3)
       json
       rake
 
